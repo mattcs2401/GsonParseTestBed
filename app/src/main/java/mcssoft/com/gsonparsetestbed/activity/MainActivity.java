@@ -11,8 +11,12 @@ import com.google.gson.stream.JsonToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import mcssoft.com.gsonparsetestbed.R;
+import mcssoft.com.gsonparsetestbed.model.Meeting;
+import mcssoft.com.gsonparsetestbed.model.Race;
 import mcssoft.com.gsonparsetestbed.model.RaceDay;
 
 public class
@@ -70,25 +74,20 @@ MainActivity extends AppCompatActivity {
                     case NAME:
                         name = reader.nextName();
                         if(name.equals("RaceDay")) {
-                            raceDay = new RaceDay();
                             parseRaceDay();
                         }
                         break;
                     case BOOLEAN:
                         boolean b = reader.nextBoolean();
-                        bp="";
                         break;
                     case NUMBER:
                         long l = reader.nextLong();
-                        bp="";
                         break;
                     case STRING:
                         String s = reader.nextString();
-                        bp="";
                         break;
                     case NULL:
                         reader.nextNull();
-                        bp="";
                         break;
                     case END_DOCUMENT:
                         break;
@@ -101,15 +100,18 @@ MainActivity extends AppCompatActivity {
         }
     }
 
-    private void parseRaceDay() throws IOException{
+    private void parseRaceDay() throws IOException {
+        raceDay = new RaceDay();
+
         reader.beginObject();
+
         while(reader.hasNext()) {
             token = reader.peek();
             switch(token) {
                 case NAME:
                     name = reader.nextName();
                     if(name.equals("MeetingDate")) {
-                        raceDay.setMeetingDate(name);
+                        raceDay.setMeetingDate(reader.nextString());
                     } else if(name.equals("Meetings")) {
                         parseMeetings();
                     }
@@ -120,14 +122,85 @@ MainActivity extends AppCompatActivity {
         }
     }
 
-    private void parseMeetings() throws IOException{
+    private void parseMeetings() throws IOException {
+        lMeetings = new ArrayList<Meeting>();
+//        String[] names = new String[] {"Abandoned","MeetingId","MeetingCode","VenueName"};
         reader.beginArray();
         reader.beginObject();
+
         while(reader.hasNext()) {
             token = reader.peek();
             switch(token) {
                 case NAME:
-                    name = reader .nextName();
+                    name = reader.nextName();
+                    if(name.equals("Abandoned")) {
+                        // begining of Meeting info.
+                        meeting = new Meeting();
+                    }
+                    switch(name) {
+                        case "Abandoned":
+                            meeting.setAbandoned(reader.nextBoolean());
+                            break;
+                        case "MeetingId":
+                            meeting.setMeetingId(reader.nextLong());
+                            break;
+                        case "MeetingCode":
+                            meeting.setMeetingCode(reader.nextString());
+                            break;
+                        case "VenueName":
+                            meeting.setMeetingCode(reader.nextString());
+                            break;
+                        case "Races":
+                            parseRaces(meeting);
+                            break;
+                    }
+                    break;
+                default:
+                    reader.skipValue();
+            }
+        }
+    }
+
+    /**
+     * Parse the Race information.
+     * @param meeting The Meeting associated with the racing information.
+     */
+    private void parseRaces(Meeting meeting) throws IOException {
+
+        reader.beginArray();
+        reader.beginObject();
+
+        while(reader.hasNext()) {
+            token = reader.peek();
+            switch (token) {
+                case NAME:
+                    name = reader.nextName();
+                    if(name.equals("RaceNumber")) {
+                        race = new Race();
+                    }
+                    switch(name) {
+                        case "RaceNumber":
+                            race.setRaceNumber(reader.nextLong());
+                            break;
+                        case "RaceTime":
+                            race.setRaceTime(reader.nextString());
+                            break;
+                        case "RaceName":
+                            race.setRaceName(reader.nextString());
+                            break;
+                        case "RaceDistance":
+                            race.setDistance(reader.nextLong());
+                            break;
+                        case "WeatherCondition":
+                            race.setRaceName(reader.nextString());
+                            break;
+                        case "TrackCondition":
+                            race.setRaceName(reader.nextString());
+                            break;
+                        case "TrackRating":
+                            race.setDistance(reader.nextLong());
+                            break;
+                    }
                     break;
                 default:
                     reader.skipValue();
@@ -140,4 +213,7 @@ MainActivity extends AppCompatActivity {
     private JsonToken token;
     private JsonReader reader;
     private RaceDay raceDay;
+    private Meeting meeting;
+    private Race race;
+    private List<Meeting> lMeetings;
 }
