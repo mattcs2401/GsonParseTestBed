@@ -40,7 +40,7 @@ MainActivity extends AppCompatActivity {
             is = getResources().getAssets().open("test_data.txt");
 
             if(is != null) {
-                Gson gson = new Gson();
+                gson = new Gson();
                 reader = new JsonReader( new InputStreamReader(is, "UTF-8"));
 //                RaceDay raceDay = gson.fromJson(reader, RaceDay.class);
                 parse();
@@ -113,6 +113,7 @@ MainActivity extends AppCompatActivity {
                     if(name.equals("MeetingDate")) {
                         raceDay.setMeetingDate(reader.nextString());
                     } else if(name.equals("Meetings")) {
+                        lMeetings = new ArrayList<>();
                         parseMeetings();
                     }
                     break;
@@ -123,8 +124,6 @@ MainActivity extends AppCompatActivity {
     }
 
     private void parseMeetings() throws IOException {
-        lMeetings = new ArrayList<Meeting>();
-//        String[] names = new String[] {"Abandoned","MeetingId","MeetingCode","VenueName"};
         reader.beginArray();
         reader.beginObject();
 
@@ -148,10 +147,13 @@ MainActivity extends AppCompatActivity {
                             meeting.setMeetingCode(reader.nextString());
                             break;
                         case "VenueName":
-                            meeting.setMeetingCode(reader.nextString());
+                            meeting.setVenueName(reader.nextString());
                             break;
                         case "Races":
+                            // get the Race info for this meeting.
                             parseRaces(meeting);
+                            // add to the list.
+                            lMeetings.add(meeting);
                             break;
                     }
                     break;
@@ -177,6 +179,7 @@ MainActivity extends AppCompatActivity {
                     name = reader.nextName();
                     if(name.equals("RaceNumber")) {
                         race = new Race();
+//                        race = gson.fromJson(reader, Race.class);
                     }
                     switch(name) {
                         case "RaceNumber":
@@ -192,14 +195,18 @@ MainActivity extends AppCompatActivity {
                             race.setDistance(reader.nextLong());
                             break;
                         case "WeatherCondition":
-                            race.setRaceName(reader.nextString());
+                            race.setWeatherCondition(reader.nextString());
                             break;
                         case "TrackCondition":
-                            race.setRaceName(reader.nextString());
+                            race.setTrackCondition(reader.nextString());
                             break;
                         case "TrackRating":
-                            race.setDistance(reader.nextLong());
+                            race.setTrackRating(reader.nextLong());
                             break;
+                        case "Pools":
+                            // got all the Race info we want.
+                            meeting.addRace(race);
+                            return;
                     }
                     break;
                 default:
@@ -215,5 +222,6 @@ MainActivity extends AppCompatActivity {
     private RaceDay raceDay;
     private Meeting meeting;
     private Race race;
+    private Gson gson;
     private List<Meeting> lMeetings;
 }

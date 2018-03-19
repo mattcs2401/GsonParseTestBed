@@ -1,121 +1,90 @@
 
 package mcssoft.com.gsonparsetestbed.model;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gson.annotations.SerializedName;
 
 public class Meeting {
 
-    @SerializedName("Abandoned")
-    private Boolean mAbandoned;
-    @SerializedName("BoxChallengeAvailable")
-    private Boolean mBoxChallengeAvailable;
-    @SerializedName("DriverChallengeAvailable")
-    private Boolean mDriverChallengeAvailable;
-    @SerializedName("JockeyChallengeAvailable")
-    private Boolean mJockeyChallengeAvailable;
-    @SerializedName("MeetingCode")
-    private String mMeetingCode;
-    @SerializedName("MeetingId")
-    private Long mMeetingId;
-    @SerializedName("MeetingType")
-    private String mMeetingType;
-    @SerializedName("Races")
-    private List<Race> mRaces;
-    @SerializedName("TrackChanged")
-    private Boolean mTrackChanged;
-    @SerializedName("VenueName")
-    private String mVenueName;
-    @SerializedName("WeatherChanged")
-    private Boolean mWeatherChanged;
+    public Meeting() {
+        lRaces = new ArrayList<>();
+    }
+
+    private Boolean abandoned;
+    private String meetingCode;
+    private Long meetingId;
+    private String meetingType;
+    private List<Race> lRaces;
+    private Boolean trackChanged;
+    private String venueName;
+    private Boolean weatherChanged;
 
     public Boolean getAbandoned() {
-        return mAbandoned;
+        return abandoned;
     }
 
     public void setAbandoned(Boolean Abandoned) {
-        mAbandoned = Abandoned;
-    }
-
-    public Boolean getBoxChallengeAvailable() {
-        return mBoxChallengeAvailable;
-    }
-
-    public void setBoxChallengeAvailable(Boolean BoxChallengeAvailable) {
-        mBoxChallengeAvailable = BoxChallengeAvailable;
-    }
-
-    public Boolean getDriverChallengeAvailable() {
-        return mDriverChallengeAvailable;
-    }
-
-    public void setDriverChallengeAvailable(Boolean DriverChallengeAvailable) {
-        mDriverChallengeAvailable = DriverChallengeAvailable;
-    }
-
-    public Boolean getJockeyChallengeAvailable() {
-        return mJockeyChallengeAvailable;
-    }
-
-    public void setJockeyChallengeAvailable(Boolean JockeyChallengeAvailable) {
-        mJockeyChallengeAvailable = JockeyChallengeAvailable;
+        abandoned = Abandoned;
     }
 
     public String getMeetingCode() {
-        return mMeetingCode;
+        return meetingCode;
     }
 
     public void setMeetingCode(String MeetingCode) {
-        mMeetingCode = MeetingCode;
+        meetingCode = MeetingCode;
     }
 
     public Long getMeetingId() {
-        return mMeetingId;
+        return meetingId;
     }
 
     public void setMeetingId(Long MeetingId) {
-        mMeetingId = MeetingId;
+        meetingId = MeetingId;
     }
 
     public String getMeetingType() {
-        return mMeetingType;
+        return meetingType;
     }
 
     public void setMeetingType(String MeetingType) {
-        mMeetingType = MeetingType;
+        meetingType = MeetingType;
     }
 
     public List<Race> getRaces() {
-        return mRaces;
+        return lRaces;
     }
 
     public void setRaces(List<Race> Races) {
-        mRaces = Races;
+        lRaces = Races;
     }
 
+    public void addRace(Race race) { lRaces.add(race); }
+
+    public Race getRace(int ndx) { return lRaces.get(ndx); }
+
     public Boolean getTrackChanged() {
-        return mTrackChanged;
+        return trackChanged;
     }
 
     public void setTrackChanged(Boolean TrackChanged) {
-        mTrackChanged = TrackChanged;
+        trackChanged = TrackChanged;
     }
 
     public String getVenueName() {
-        return mVenueName;
+        return venueName;
     }
 
     public void setVenueName(String VenueName) {
-        mVenueName = VenueName;
+        venueName = VenueName;
     }
 
     public Boolean getWeatherChanged() {
-        return mWeatherChanged;
+        return weatherChanged;
     }
 
     public void setWeatherChanged(Boolean WeatherChanged) {
-        mWeatherChanged = WeatherChanged;
+        weatherChanged = WeatherChanged;
     }
 
 }
