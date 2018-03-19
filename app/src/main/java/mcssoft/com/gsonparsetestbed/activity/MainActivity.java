@@ -117,6 +117,18 @@ MainActivity extends AppCompatActivity {
                         parseMeetings();
                     }
                     break;
+                case BEGIN_OBJECT:
+                    reader.beginObject();
+                    break;
+                case END_OBJECT:
+                    reader.endObject();
+                    break;
+                case BEGIN_ARRAY:
+                    reader.beginArray();
+                    break;
+                case END_ARRAY:
+                    reader.endArray();
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -132,12 +144,9 @@ MainActivity extends AppCompatActivity {
             switch(token) {
                 case NAME:
                     name = reader.nextName();
-                    if(name.equals("Abandoned")) {
-                        // begining of Meeting info.
-                        meeting = new Meeting();
-                    }
                     switch(name) {
                         case "Abandoned":
+                            meeting = new Meeting();
                             meeting.setAbandoned(reader.nextBoolean());
                             break;
                         case "MeetingId":
@@ -157,6 +166,18 @@ MainActivity extends AppCompatActivity {
                             break;
                     }
                     break;
+                case BEGIN_OBJECT:
+                    reader.beginObject();
+                    break;
+                case END_OBJECT:
+                    reader.endObject();
+                    break;
+                case BEGIN_ARRAY:
+                    reader.beginArray();
+                    break;
+                case END_ARRAY:
+                    reader.endArray();
+                    break;
                 default:
                     reader.skipValue();
             }
@@ -168,21 +189,18 @@ MainActivity extends AppCompatActivity {
      * @param meeting The Meeting associated with the racing information.
      */
     private void parseRaces(Meeting meeting) throws IOException {
-
+        boolean hasRace = false;
         reader.beginArray();
         reader.beginObject();
 
-        while(reader.hasNext()) {
+        while(reader.hasNext() && hasRace == false) {
             token = reader.peek();
             switch (token) {
                 case NAME:
                     name = reader.nextName();
-                    if(name.equals("RaceNumber")) {
-                        race = new Race();
-//                        race = gson.fromJson(reader, Race.class);
-                    }
                     switch(name) {
                         case "RaceNumber":
+                            race = new Race();
                             race.setRaceNumber(reader.nextLong());
                             break;
                         case "RaceTime":
@@ -206,8 +224,20 @@ MainActivity extends AppCompatActivity {
                         case "Pools":
                             // got all the Race info we want.
                             meeting.addRace(race);
-                            return;
+                            hasRace = true;
                     }
+                    break;
+                case BEGIN_OBJECT:
+                    reader.beginObject();
+                    break;
+                case END_OBJECT:
+                    reader.endObject();
+                    break;
+                case BEGIN_ARRAY:
+                    reader.beginArray();
+                    break;
+                case END_ARRAY:
+                    reader.endArray();
                     break;
                 default:
                     reader.skipValue();
