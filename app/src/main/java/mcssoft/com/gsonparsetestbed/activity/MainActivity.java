@@ -3,6 +3,7 @@ package mcssoft.com.gsonparsetestbed.activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -41,6 +42,7 @@ MainActivity extends AppCompatActivity {
 
             if(is != null) {
                 reader = new JsonReader( new InputStreamReader(is, "UTF-8"));
+                reader.setLenient(true);
 
                 parse();
 
@@ -65,19 +67,7 @@ MainActivity extends AppCompatActivity {
                             if(reader.nextName().equals("RaceDay")) {
                                 parseRaceDay();
                             }
-                        break;
-//                        case BOOLEAN:
-//                            reader.nextBoolean();
-//                            break;
-//                        case NUMBER:
-//                            reader.nextLong();
-//                            break;
-//                        case STRING:
-//                            reader.nextString();
-//                            break;
-//                        case NULL:
-//                            reader.nextNull();
-//                            break;
+                            break;
                         case END_DOCUMENT:
                             break;
                         default:
@@ -90,72 +80,80 @@ MainActivity extends AppCompatActivity {
         }
     }
 
-    private void parseRaceDay() throws IOException {
+    private void parseRaceDay() {
         String name;
         JsonToken token;
         raceDay = new RaceDay();
 
-        reader.beginObject();
+        try {
+            reader.beginObject();
 
-        while(reader.hasNext()) {
-            token = reader.peek();
-            if(!otherToken(token)) {
-                switch (token) {
-                    case NAME:
-                        name = reader.nextName();
-                        if (name.equals("MeetingDate")) {
-                            raceDay.setMeetingDate(reader.nextString());
-                        } else if (name.equals("Meetings")) {
-                            lMeetings = new ArrayList<>();
-                            parseMeetings();
-                        }
-                        break;
-                    default:
-                        reader.skipValue();
+            while (reader.hasNext()) {
+                token = reader.peek();
+                if (!otherToken(token)) {
+                    switch (token) {
+                        case NAME:
+                            name = reader.nextName();
+                            if (name.equals("MeetingDate")) {
+                                raceDay.setMeetingDate(reader.nextString());
+                            } else if (name.equals("Meetings")) {
+                                lMeetings = new ArrayList<>();
+                                parseMeetings();
+                            }
+                            break;
+                        default:
+                            reader.skipValue();
+                    }
                 }
             }
+        } catch(Exception ex) {
+            Log.d("parseRaceDay", ex.getMessage());
         }
     }
 
-    private void parseMeetings() throws IOException {
+    private void parseMeetings() {
         String name;
         JsonToken token;
 
-        reader.beginArray();
-        reader.beginObject();
+        try {
+            reader.beginArray();
+            reader.beginObject();
 
-        while(reader.hasNext()) {
-            token = reader.peek();
-            if(!otherToken(token)) {
-                switch (token) {
-                    case NAME:
-                        name = reader.nextName(); // debug
-                        switch (name) {
-                            case "Abandoned":
-                                meeting = new Meeting();
-                                meeting.setAbandoned(reader.nextBoolean());
-                                break;
-                            case "MeetingId":
-                                meeting.setMeetingId(reader.nextLong());
-                                break;
-                            case "MeetingCode":
-                                meeting.setMeetingCode(reader.nextString());
-                                break;
-                            case "VenueName":
-                                meeting.setVenueName(reader.nextString());
-                                break;
-                            case "Races":
-                                // get the Race info for this meeting.
-                                parseRaces(meeting);
-                                // add to the list.
-                                lMeetings.add(meeting);
-                                break;
-                        }
-                        break;
-                    default:
-                        reader.skipValue();
+            while (reader.hasNext()) {
+                token = reader.peek();
+                if (!otherToken(token)) {
+                    switch (token) {
+                        case NAME:
+                            name = reader.nextName(); // debug
+                            switch (name) {
+                                case "Abandoned":
+                                    meeting = new Meeting();
+                                    meeting.setAbandoned(reader.nextBoolean());
+                                    break;
+                                case "MeetingId":
+                                    meeting.setMeetingId(reader.nextLong());
+                                    break;
+                                case "MeetingCode":
+                                    meeting.setMeetingCode(reader.nextString());
+                                    break;
+                                case "VenueName":
+                                    meeting.setVenueName(reader.nextString());
+                                    break;
+                                case "Races":
+                                    // get the Race info for this meeting.
+                                    parseRaces(meeting);
+                                    // add to the list.
+                                    lMeetings.add(meeting);
+                                    break;
+                            }
+                            break;
+                        default:
+                            reader.skipValue();
+                    }
                 }
             }
+        } catch(Exception ex) {
+            Log.d("parseMeetings", ex.getMessage());
         }
     }
 
@@ -163,15 +161,15 @@ MainActivity extends AppCompatActivity {
      * Parse the Race information.
      * @param meeting The Meeting associated with the racing information.
      */
-    private void parseRaces(Meeting meeting) throws IOException {
+    private void parseRaces(Meeting meeting) {
         String name;
         JsonToken token;
         boolean haveRaces = false;
 
-        reader.beginArray();
-        reader.beginObject();
-
         try {
+            reader.beginArray();
+            reader.beginObject();
+
             while (reader.hasNext() && haveRaces == false) {
                 token = reader.peek();
                 if (!otherToken(token)) {
@@ -208,6 +206,7 @@ MainActivity extends AppCompatActivity {
                                 case "Pools":
                                     // got all the Race info we want.
                                     meeting.addRace(race);
+                                    skipPools();
                                     // TODO - something to indicate last Race.
                                     //haveRaces = true;
                             }
@@ -218,41 +217,136 @@ MainActivity extends AppCompatActivity {
                 }
             }
         } catch(Exception ex) {
-            String bp = "";
+            Log.d("patseRaces", ex.getMessage());
         }
     }
 
-    private boolean otherToken(JsonToken token) throws IOException {
-        switch(token) {
-            case BEGIN_OBJECT:
-                reader.beginObject();
-                return true;
-            case END_OBJECT:
-                reader.endObject();
-                return true;
-            case BEGIN_ARRAY:
-                reader.beginArray();
-                return true;
-            case END_ARRAY:
-                reader.endArray();
-                return true;
-            case BOOLEAN:
-                reader.nextBoolean();
-                return true;
-            case NUMBER:
-                reader.nextLong();
-                return true;
-            case STRING:
-                reader.nextString();
-                return true;
-            case NULL:
-                reader.nextNull();
-                return true;
+    private boolean otherToken(JsonToken token) {
+        try {
+            switch (token) {
+                case BEGIN_OBJECT:
+                    reader.beginObject();
+                    return true;
+                case END_OBJECT:
+                    reader.endObject();
+                    return true;
+                case BEGIN_ARRAY:
+                    reader.beginArray();
+                    return true;
+                case END_ARRAY:
+                    reader.endArray();
+                    return true;
+                case BOOLEAN:
+                    reader.nextBoolean();
+                    return true;
+                case NUMBER:
+                    reader.nextLong();
+                    return true;
+                case STRING:
+                    reader.nextString();
+                    return true;
+                case NULL:
+                    reader.nextNull();
+                    return true;
+            }
+        } catch(Exception ex) {
+            Log.d("otherToken", ex.getMessage());
         }
         return false;
     }
 
-//    private String name;
+    /**
+     * Skip the Pools array of objects.
+     */
+    private void skipPools() {
+        JsonToken token;
+
+        try {
+            while (reader.hasNext()) {
+                token = reader.peek();
+                switch(token) {
+                    case BEGIN_ARRAY:
+                        reader.beginArray();
+                        break;
+                    case END_ARRAY:
+                        reader.endArray();
+                        break;
+                    case BEGIN_OBJECT:
+                        skipPool();
+                        break;
+                    case END_OBJECT:
+                        reader.endObject();
+                        break;
+                }
+            }
+        } catch(Exception ex) {
+            Log.d("skipPools", ex.getMessage());
+        }
+    }
+
+    /**
+     * Skip the Pool object.
+     */
+    private void skipPool() {
+        String name;
+        JsonToken token;
+
+        try {
+            reader.beginObject();
+
+            while (reader.hasNext()) {
+                token = reader.peek();
+                switch (token) {
+//                    case STRING:
+//                        reader.nextString();
+//                        break;
+//                    case BOOLEAN:
+//                        reader.nextBoolean();
+//                        break;
+//                    case NUMBER:
+//                        reader.nextLong();
+//                        break;
+                    case NAME:
+                        name = reader.nextName();
+                        switch (name) {
+                            case "Dividends":
+                                reader.beginArray();
+                                reader.endArray();
+                                break;
+                            case "Legs:":
+                                reader.beginArray();
+                                reader.endArray();
+                                break;
+                            default:
+                                reader.skipValue();
+                        }
+                        break;
+                    case END_OBJECT:
+                        reader.endObject();
+                        return;
+                }
+            }
+        } catch(Exception ex) {
+            Log.d("skipPool", ex.getMessage());
+        }
+    }
+
+    private void skipTips() {
+        String name;
+        JsonToken token;
+
+        try {
+            while (reader.hasNext()) {
+                token = reader.peek();
+                switch (token) {
+
+                }
+            }
+        } catch(Exception ex) {
+
+        }
+    }
+
     private JsonReader reader;
     private RaceDay raceDay;
     private Meeting meeting;
