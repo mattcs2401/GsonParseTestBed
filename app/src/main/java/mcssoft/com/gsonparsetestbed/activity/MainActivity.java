@@ -209,6 +209,12 @@ MainActivity extends AppCompatActivity {
                                     skipPools();
                                     // TODO - something to indicate last Race.
                                     //haveRaces = true;
+                                case "Tips":
+                                    skipTips();
+                                    break;
+                                case "Results":
+                                    skipResults();
+                                    break;
                             }
                             break;
                         default:
@@ -268,17 +274,15 @@ MainActivity extends AppCompatActivity {
                     case BEGIN_ARRAY:
                         reader.beginArray();
                         break;
-                    case END_ARRAY:
-                        reader.endArray();
-                        break;
+//                    case END_ARRAY:
+//                        reader.endArray();
+//                        break;
                     case BEGIN_OBJECT:
                         skipPool();
                         break;
-                    case END_OBJECT:
-                        reader.endObject();
-                        break;
                 }
             }
+            reader.endArray();
         } catch(Exception ex) {
             Log.d("skipPools", ex.getMessage());
         }
@@ -288,51 +292,56 @@ MainActivity extends AppCompatActivity {
      * Skip the Pool object.
      */
     private void skipPool() {
-        String name;
-        JsonToken token;
-
         try {
             reader.beginObject();
 
             while (reader.hasNext()) {
-                token = reader.peek();
-                switch (token) {
-//                    case STRING:
-//                        reader.nextString();
-//                        break;
-//                    case BOOLEAN:
-//                        reader.nextBoolean();
-//                        break;
-//                    case NUMBER:
-//                        reader.nextLong();
-//                        break;
-                    case NAME:
-                        name = reader.nextName();
-                        switch (name) {
-                            case "Dividends":
-                                reader.beginArray();
-                                reader.endArray();
-                                break;
-                            case "Legs:":
-                                reader.beginArray();
-                                reader.endArray();
-                                break;
-                            default:
-                                reader.skipValue();
-                        }
-                        break;
-                    case END_OBJECT:
-                        reader.endObject();
-                        return;
-                }
+                reader.skipValue();
             }
+            reader.endObject();
         } catch(Exception ex) {
             Log.d("skipPool", ex.getMessage());
         }
     }
 
     private void skipTips() {
-        String name;
+        JsonToken token;
+
+        try {
+            while (reader.hasNext()) {
+                token = reader.peek();
+                switch(token) {
+                    case BEGIN_ARRAY:
+                        reader.beginArray();
+                        break;
+//                    case END_ARRAY:
+//                        reader.endArray();
+//                        break;
+                    case BEGIN_OBJECT:
+                        skipTip();
+                        break;
+                }
+            }
+            reader.endArray();
+        } catch(Exception ex) {
+            Log.d("skipTips", ex.getMessage());
+        }
+    }
+
+    private void skipTip() {
+        try {
+            reader.beginObject();
+
+            while (reader.hasNext()) {
+                reader.skipValue();
+            }
+            reader.endObject();
+        } catch(Exception ex) {
+            Log.d("skipTip", ex.getMessage());
+        }
+    }
+
+    private void skipResults() {
         JsonToken token;
 
         try {
@@ -343,7 +352,20 @@ MainActivity extends AppCompatActivity {
                 }
             }
         } catch(Exception ex) {
+            Log.d("skipTip", ex.getMessage());
+        }
+    }
 
+    private void skipResult() {
+        try {
+            reader.beginObject();
+
+            while (reader.hasNext()) {
+                reader.skipValue();
+            }
+            reader.endObject();
+        } catch(Exception ex) {
+            Log.d("skipPool", ex.getMessage());
         }
     }
 
